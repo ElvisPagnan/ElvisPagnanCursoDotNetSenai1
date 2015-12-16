@@ -1,0 +1,28 @@
+﻿@model BlogElvis.Web.Models.Blog.ListarPostViewModel
+
+
+@if (Model.TotalPaginas > 1)
+{
+    var paginaAnterior = Model.PaginaAtual - 1;
+    var proximaPagina = Model.PaginaAtual + 1;
+
+    <div class="paination">
+        @if (Model.PaginaAtual > 1)
+        {
+            @Html.ActionLink("Página anterior",
+                                  "Index",
+                                  "Blog",
+                                  new { pagina = paginaAnterior, Tag = Model.Tag, pesquisa = Model.Pesquisa},
+                                  new { rel = "prev" })
+        }
+        @if (Model.PaginaAtual < Model.TotalPaginas)
+        {
+            @Html.ActionLink("Próxima página ",
+                                  "Index",
+                                  "Blog",
+                                  new { pagina = proximaPagina, Tag = Model.Tag, pesquisa = Model.Pesquisa},
+                                  new { rel = "prev" })
+        }
+    </div>
+
+}

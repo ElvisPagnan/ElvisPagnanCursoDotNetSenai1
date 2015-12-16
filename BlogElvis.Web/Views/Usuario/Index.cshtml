@@ -1,0 +1,26 @@
+﻿@model BlogElvis.Web.Models.Blog.ListarUsuarioViewModel
+
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+@section Scripts
+{
+    <script src="@Url.Content("~/Scripts/Views/Blog/Index.js")"></script>
+}
+<h1>Usuarios</h1>
+
+
+@foreach (var item in Model.Usuarios)
+{
+    <h2>@Html.ActionLink(item.Nome, "EditarUsuario", "Usuario", new { id = item.Id }, null)</h2><br>
+    <div>
+        @item.Nome
+    </div>
+    <div>
+        @item.Login
+    </div>
+    @Html.ActionLink("Excluir", "ExcluirUsuario", "Usuario", new { id = item.Id }, new { @class = "excluir-usuario" })
+}
+

@@ -36,6 +36,9 @@ namespace BlogElvis.Web.Models
         [StringLength(100, ErrorMessage = "O campo Página Web deve possuir no máximo {1} caracteres!")]
         public string ComentarioPaginaWeb { get; set; }
 
+        public int PaginaAtual { get; set; }
+        public int TotalAtual { get; set; }
+        public IList<Comentario> Comentarios { get; set; }
 
     }
 }

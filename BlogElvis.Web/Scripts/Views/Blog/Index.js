@@ -12,4 +12,11 @@
             e.preventDefault();
         }
     });
+
+    $('.excluir-comentario').on('click', function (e) {
+        //alert ('Olá, este é um alerta do java Script');
+        if (!confirm('Deseja realmente excluir esse comentário?')) {
+            e.preventDefault();
+        }
+    });
 });

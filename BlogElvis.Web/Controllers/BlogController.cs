@@ -14,31 +14,51 @@ namespace BlogElvis.Web.Controllers
     public class BlogController : Controller
     {
         #region Post
-        public ActionResult Post(int? Id)
+        public ActionResult Post(int? Id, int? pagina)
         {
             var conexaoBanco = new ConexaoBanco();
 
             var post = (from p in conexaoBanco.Posts
                         where p.Id == Id
-                        select new DetalhesPostViewModel
-                        {
-                            Id = p.Id,
-                            Autor = p.Autor,
-                            DataPublicacao = p.Publicacao,
-                            Titulo = p.Titulo,
-                            Resumo = p.Resumo,
-                            Visivel = p.Visivel,
-                            Descricao = p.Descricao,
-
-                            Tags = p.PostTag.Select(x => x.Tag).ToList()
-                        }).FirstOrDefault();
+                        select p).FirstOrDefault();
 
             if (post == null)
             {
                 throw new Exception(string.Format("Post código {0} não encontrado", Id));
             }
 
-            return View(post);
+            var viewModel = new DetalhesPostViewModel();
+            preencherViewModel(post, viewModel, pagina);
+            return View(viewModel);
+        }
+
+        private void preencherViewModel(Post post, DetalhesPostViewModel viewModel, int? pagina)
+        {
+            viewModel.Id = post.Id;
+            viewModel.Autor = post.Autor;
+            viewModel.DataPublicacao = post.Publicacao;
+            viewModel.Titulo = post.Titulo;
+            viewModel.Resumo = post.Resumo;
+            viewModel.Visivel = post.Visivel;
+            viewModel.Descricao = post.Descricao;
+            viewModel.Tags = post.PostTag.Select(x => x.Tag).ToList();
+
+            var paginaCorreta = pagina.GetValueOrDefault(1);
+            var registrosPorPagina = 10;
+
+            var qtdeRegistros = post.Comentarios.Count();
+
+            var indiceDaPagina = paginaCorreta - 1;
+            var qtdeRegistrosPular = (indiceDaPagina * registrosPorPagina);
+            var qtdePaginas = Math.Ceiling((decimal)qtdeRegistros / registrosPorPagina);
+
+            viewModel.Comentarios = (from p in post.Comentarios
+                                     orderby p.DataHora descending
+                                     select p).Skip(qtdeRegistrosPular).Take(registrosPorPagina).ToList();
+
+            viewModel.PaginaAtual = paginaCorreta;
+            viewModel.TotalAtual = (int) qtdePaginas;
+
         }
         #endregion
 
@@ -78,7 +98,17 @@ namespace BlogElvis.Web.Controllers
             var viewModel = new ListarPostViewModel();
             viewModel.Posts = (from p in posts
                                orderby p.Publicacao descending //(Só colocar aqui)
-                               select p).Skip(qtdeRegistrosPular).Take(registrosPorPagina).ToList();
+                               select new DetalhesPostViewModel
+                               {
+                                   DataPublicacao = p.Publicacao,
+                                   Autor = p.Autor,
+                                   Descricao = p.Descricao,
+                                   Id = p.Id,
+                                   Resumo = p.Resumo,
+                                   Titulo = p.Titulo,
+                                   Visivel = p.Visivel,
+                                   QtdeComentario = p.Comentarios.Count
+                               }).Skip(qtdeRegistrosPular).Take(registrosPorPagina).ToList();
             viewModel.PaginaAtual = paginaCorreta;
             viewModel.TotalPaginas = (int)qtdePaginas;
             viewModel.Tag = tag;
@@ -96,6 +126,51 @@ namespace BlogElvis.Web.Controllers
             return PartialView();
         }
 
+        [HttpPost]
+        public ActionResult Post(DetalhesPostViewModel viewModel)
+        {
+            var conexaoBanco = new ConexaoBanco();
+            var post = (from p in conexaoBanco.Posts
+                      where p.Id == viewModel.Id
+                      select p).FirstOrDefault();
 
+            if (ModelState.IsValid)
+            {
+                if (post == null)
+                {
+                    throw new Exception(string.Format("Post código {0} não encontrado.", viewModel.Id));
+                };
+
+                var comentario = new Comentario();
+                comentario.AdmPost = HttpContext.User.Identity.IsAuthenticated;
+                comentario.Descricao = viewModel.ComentarioDescricao;
+                comentario.Email = viewModel.ComentarioEmail;
+                comentario.IdPost = viewModel.Id;
+                comentario.Nome = viewModel.ComentarioNome;
+                comentario.PaginaWeb = viewModel.ComentarioPaginaWeb;
+                comentario.DataHora = DateTime.Now;
+
+                try
+                {
+                    conexaoBanco.Comentaos.Add(comentario);
+                    conexaoBanco.SaveChanges();
+                    return Redirect(Url.Action("Post", new
+                    {
+                        ano = post.Publicacao.Year,
+                        mes = post.Publicacao.Month,
+                        dia = post.Publicacao.Day,
+                        titulo = post.Titulo,
+                        id = post.Id
+                    }) + "#comentarios");
+                }
+                catch (Exception exp)
+                {
+                    ModelState.AddModelError("", exp.Message);
+                }
+            }
+            preencherViewModel(post, viewModel,null);
+            return View(viewModel);
+        }
+        
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlogElvis.DB.Infra
 {
-    class MeuCriadorDeBanco:DropCreateDatabaseIfModelChanges<ConexaoBanco>
+    public class MeuCriadorDeBanco : DropCreateDatabaseAlways<ConexaoBanco>
     {
         protected override void Seed(ConexaoBanco context)
         {

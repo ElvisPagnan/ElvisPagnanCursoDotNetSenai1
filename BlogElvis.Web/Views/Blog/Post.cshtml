@@ -11,14 +11,14 @@
     <div class="icone-autor div-imagem"></div> 
     @Model.Autor
     <div class="icone-comentario div-imagem"></div>
-    <a href="Url.Action(" Post", "Blog" ) , new
-       {
-       id=item.Id,
-       ano=item.DataPublicacao.Year,
-       mes=item.DataPublicacao.Month,
-       dia=item.DataPublicacao.Day,
-       titulo=item.Titulo
-       })#comentarios">@Model.QtdeComentario</a>
+    <a href="@Url.Action("Post", "Blog", new
+                {
+                    id = Model.Id,
+                    ano = Model.DataPublicacao.Year,
+                    mes = Model.DataPublicacao.Month,
+                    dia = Model.DataPublicacao.Day,
+                    titulo = Model.Titulo
+                })#comentarios">@Model.QtdeComentario</a>
     @if (Request.IsAuthenticated)
     {
         <div class="icone-excluir div-imagem"></div>
@@ -111,6 +111,7 @@
             }
         }
     </div>
+    @Html.Partial("_PaginacaoPost", Model)
 </div>
 
 

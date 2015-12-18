@@ -171,6 +171,12 @@ namespace BlogElvis.Web.Controllers
             preencherViewModel(post, viewModel,null);
             return View(viewModel);
         }
-        
+
+
+        public ActionResult _PaginacaoPost()
+        {
+            return PartialView();
+        }
+
     }
 }
